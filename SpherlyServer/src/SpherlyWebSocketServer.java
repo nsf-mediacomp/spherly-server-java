@@ -192,9 +192,11 @@ public class SpherlyWebSocketServer extends WebSocketServer{
 	}
 
 	@Override
-	public void onError(WebSocket conn, Exception ex) {
-		displayError(ex.getStackTrace().toString());
-		ex.printStackTrace();
+	public void onError(WebSocket conn, Exception e) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		e.printStackTrace(pw);
+		displayError(sw.toString());
 	}
 	
 	//Seperate functions to deal with larger responses to certain messages

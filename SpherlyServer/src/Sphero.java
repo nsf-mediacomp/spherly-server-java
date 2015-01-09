@@ -308,8 +308,10 @@ public class Sphero {
 						}
 						
 					}catch(Exception e){
-						e.printStackTrace();
-						server.displayError(e.getStackTrace().toString());
+						StringWriter sw = new StringWriter();
+						PrintWriter pw = new PrintWriter(sw);
+						e.printStackTrace(pw);
+						server.displayError(sw.toString());
 					}
 				}
 				displayMessage("end listening...");
