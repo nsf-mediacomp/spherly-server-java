@@ -22,6 +22,9 @@ public class SpherlyWebSocketServer extends WebSocketServer{
 	private Object lock;
 	private Main commandPrompt;
 	
+	private Thread listDevicesThread;
+	private Thread connectionThread;
+	
 	public SpherlyWebSocketServer(Main commandPrompt) throws UnknownHostException {
 		super(new InetSocketAddress(8080));
 		this.commandPrompt = commandPrompt;
@@ -62,33 +65,77 @@ public class SpherlyWebSocketServer extends WebSocketServer{
 		String command = (String)data.get("command");
 		//System.out.println("Command: " + command);
 		if (command.equals("listDevices")){
-			JSONArray response = ListDevices(data);
-			conn.send(response.toJSONString());
+			class ListDevicesThread extends Thread{
+				JSONObject data;
+				WebSocket conn;
+				public ListDevicesThread(JSONObject data, WebSocket conn){
+					this.data = data;
+					this.conn = conn;
+				}
+				
+				public void run(){
+					try{
+						JSONArray response = ListDevices(data);
+						conn.send(response.toJSONString());
+					}catch (NullPointerException e){
+						
+					}
+				}
+			}
+			listDevicesThread = new ListDevicesThread(data, conn);
+			listDevicesThread.start();
+		}
+		else if (command.equals("cancelListDevices")){
+			displayMessage("cancel device search");
+			listDevicesThread.interrupt();
+			listDevicesThread = null;
 		}
 		else if (command.equals("connectToDevice")){
-			JSONObject response = ConnectToDevice(data);
-			conn.send(response.toJSONString());
-			
-			final WebSocket connection = conn;
-			Sphero.SpheroHandler onPowerNotification = new Sphero.SpheroHandler() {
-				public void handle(byte data) {
-					JSONObject response = new JSONObject();
-					response.put("power", true);
-					response.put("data", data);
-					if (data == 1){
-						displayMessage("battery charging");
-					}else if (data == 3){
-						displayMessage("battery low");
-					}else if (data == 4){
-						displayMessage("battery critical!");
-					}
-
-					connection.send(response.toJSONString());
+			class ConnectionThread extends Thread{
+				JSONObject data;
+				WebSocket conn;
+				public ConnectionThread(JSONObject data, WebSocket conn){
+					this.data = data;
+					this.conn = conn;
 				}
-				public void handle() {}
-			};
-			sp.SetPowerNotificationHandler(onPowerNotification);
-			sp.EnablePowerNotification(true);
+				
+				public void run(){
+					try{
+						JSONObject response = ConnectToDevice(data);
+						conn.send(response.toJSONString());
+					}catch (NullPointerException e){
+						
+					}
+					
+					final WebSocket connection = conn;
+					Sphero.SpheroHandler onPowerNotification = new Sphero.SpheroHandler() {
+						public void handle(byte data) {
+							JSONObject response = new JSONObject();
+							response.put("power", true);
+							response.put("data", data);
+							if (data == 1){
+								displayMessage("battery charging");
+							}else if (data == 3){
+								displayMessage("battery low");
+							}else if (data == 4){
+								displayMessage("battery critical!");
+							}
+	
+							connection.send(response.toJSONString());
+						}
+						public void handle() {}
+					};
+					sp.SetPowerNotificationHandler(onPowerNotification);
+					sp.EnablePowerNotification(true);
+				}
+			}
+			connectionThread = new ConnectionThread(data, conn);
+			connectionThread.start();
+		}
+		else if (command.equals("cancelConnection")){
+			displayMessage("cancel attempted connection");
+			connectionThread.interrupt();
+			connectionThread = null;
 		}
 		else if (command.equals("disconnect")){
 			try{

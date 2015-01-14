@@ -59,8 +59,8 @@ public class Main{
 		StyleConstants.setForeground(keyWord, c);
 		
 		try{
-			doc.insertString(this.myTextPane.getText().length(),  msg+"\n", keyWord);
-			this.myTextPane.setCaretPosition(this.myTextPane.getDocument().getLength());
+			doc.insertString(doc.getLength(),  msg+"\n", keyWord);
+			this.myTextPane.setCaretPosition(doc.getLength());
 		}catch(Exception e){
 			System.out.println(e);
 		}
