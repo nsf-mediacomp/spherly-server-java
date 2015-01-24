@@ -181,6 +181,12 @@ public class SpherlyWebSocketServer extends WebSocketServer {
         } else if (command.equals("stop")) {
             displayMessage("stop Rolling");
             sp.stop();
+        } else if (command.equals("calibrateOn")){
+            displayMessage("Calibrate ON");
+            sp.calibrate(true);
+        } else if (command.equals("calibrateOff")){
+            displayMessage("Calibrate OFF");
+            sp.calibrate(false);
         } else if (command.equals("sleep")) {
             displayMessage("goodnight");
             sp.sleep();

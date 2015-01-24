@@ -120,6 +120,18 @@ public class Sphero {
         byte[] packet = buildCommand(device, command, data, false);
     }
 
+    public void resetHeading(){
+        heading = 0;
+        byte device = 0x02;
+        byte command = 0x01;
+        byte lsbHeading = (byte)(0x00);
+        byte msbHeading = (byte)(0x00);
+        byte[] data = new byte[]{msbHeading, lsbHeading};
+        byte[] packet = buildCommand(device, command, data, false);
+        comm.write(packet);
+    }
+
+
     public void setRGB(int red, int green, int blue) {
         byte device = 0x02;
         byte command = 0x20;
@@ -173,13 +185,35 @@ public class Sphero {
 
     public void setStabilization(boolean flag) {
         byte device = 0x02;
-        byte command = 0x03;
+        byte command = 0x02;
+
         int flag_data = 0;
-        if (flag) flag_data = 1;
+        if (flag) {
+            flag_data = 1;
+        }
+
         byte[] data = new byte[]{(byte) flag_data};
         byte[] packet = buildCommand(device, command, data, false);
         comm.write(packet);
     }
+
+    public void calibrate(boolean flagOn){
+        if (flagOn) {
+            // enter in the calibration process
+            setRGB(0, 0, 0);
+            setBackLED(127);
+            resetHeading();
+            setStabilization(false);
+
+        } else {
+            // stop the calibration process
+            setBackLED(0);
+            setRGB(127, 127, 127);
+            resetHeading();
+            setStabilization(true);
+        }
+    }
+
 
     public void setInactivityTimeout(int time) {
         byte device = 0x00;
