@@ -1,6 +1,7 @@
 Spherly Server Executable Jars available for download: 
 
 	-Windows 8.1 (64 bit): https://drive.google.com/file/d/0B-CV2orBTol3MWRYVW5YY0t1TnM/view?usp=sharing
+		(jre 8)
 	-Mac OSX 10 (64 bit): https://drive.google.com/file/d/0B-CV2orBTol3YnR1MG5oWUxXajQ/view?usp=sharing
 		(JDK 1.7.0.21) 
 		

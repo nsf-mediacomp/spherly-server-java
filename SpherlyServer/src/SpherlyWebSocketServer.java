@@ -170,6 +170,13 @@ public class SpherlyWebSocketServer extends WebSocketServer {
             int direction = ((Long) data.get("direction")).intValue();
             displayMessage("turn: direction=" + direction);
             sp.turn(direction);
+        }else if (command.equals("setHeading")){
+        	int heading = ((Long) data.get("heading")).intValue();
+        	displayMessage("setHeading: heading=" + heading);
+        	sp.setHeading(heading);
+        }else if (command.equals("resetHeading")){
+        	displayMessage("resetHeading");
+        	sp.resetHeading();
         } else if (command.equals("setStabilization")) {
             boolean flag = (Boolean) data.get("flag");
             displayMessage("Set Stabilization: " + flag);

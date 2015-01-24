@@ -118,17 +118,11 @@ public class Sphero {
         byte msbHeading = (byte) (heading >> 8);
         byte[] data = new byte[]{msbHeading, lsbHeading};
         byte[] packet = buildCommand(device, command, data, false);
+        comm.write(packet);
     }
 
     public void resetHeading(){
-        heading = 0;
-        byte device = 0x02;
-        byte command = 0x01;
-        byte lsbHeading = (byte)(0x00);
-        byte msbHeading = (byte)(0x00);
-        byte[] data = new byte[]{msbHeading, lsbHeading};
-        byte[] packet = buildCommand(device, command, data, false);
-        comm.write(packet);
+        setHeading(0);
     }
 
 
