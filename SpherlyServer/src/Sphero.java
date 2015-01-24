@@ -122,6 +122,7 @@ public class Sphero {
     }
 
     public void resetHeading(){
+        heading = 0;
         setHeading(0);
     }
 
@@ -191,7 +192,7 @@ public class Sphero {
         comm.write(packet);
     }
 
-    public void calibrate(boolean flagOn){
+    public void calibrate(boolean flagOn) {
         if (flagOn) {
             // enter in the calibration process
             setRGB(0, 0, 0);
