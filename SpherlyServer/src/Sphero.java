@@ -112,6 +112,7 @@ public class Sphero {
     }
 
     public void setHeading(int heading) {
+    	this.heading = heading;
         byte device = 0x02;
         byte command = 0x01;
         byte lsbHeading = (byte) (heading % 256);
