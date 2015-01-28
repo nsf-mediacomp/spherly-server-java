@@ -127,7 +127,6 @@ public class Sphero {
         setHeading(0);
     }
 
-
     public void setRGB(int red, int green, int blue) {
         byte device = 0x02;
         byte command = 0x20;
