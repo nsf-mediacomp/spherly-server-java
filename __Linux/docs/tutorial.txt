@@ -1,0 +1,23 @@
+Ubuntu::
+	0. Pair the sphero with your computer through your bluetooth manager.
+	1. Download and extract the source code
+	2. Install Python 2.7 (https://www.python.org/downloads/)
+	3. Download and Install Pywebsocket (in command line):
+		$ wget https://pywebsocket.googlecode.com/files/mod_pywebsocket-0.7.9.tar.gz
+		$ gzip -dc mod_pywebsocket-0.7.9.tar.gz | tar xf -
+		$ cd pywebsocket-0.7.9/src
+		$ python setup.py build
+		# in order to install for the system
+		$ sudo python setup.py install
+		# for just installing as a user
+		# python setup.py install --user 
+		$ cd ../..
+	4. Download and Install PyBluez
+		$ wget https://pybluez.googlecode.com/files/PyBluez-0.20.zip
+		$ unzip PyBluez-0.20.zip
+		$ cd PyBluez-0.20
+		# install necessary requisites
+		$ sudo apt-get install gcc python-dev libbluetooth-dev
+		$ sudo python setup.py install
+	5. run "python standalone.py -p 8080" ../__Linux directory
+	
