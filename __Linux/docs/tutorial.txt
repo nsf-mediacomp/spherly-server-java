@@ -20,4 +20,9 @@ Ubuntu::
 		$ sudo apt-get install gcc python-dev libbluetooth-dev
 		$ sudo python setup.py install
 	5. run "python standalone.py -p 8080" ../__Linux directory
+		--NOTE: here you may get an error saying "No sockets activated"
+		--This is likely because there is a process running that is using port 8080 already
+		--Running the following will kill all processes associated with port 8080:
+		$sudo fuser -k 8080/tcp
+		--Then, simply rerun step 5
 	

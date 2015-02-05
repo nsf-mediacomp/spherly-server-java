@@ -29,6 +29,9 @@ def web_socket_transfer_data(request):
 				for d in devices:
 					jDev.append( {'name': d[1], 'address': d[0]} )
 				print "found: ",jDev
+				if len(jDev) == 0:
+					print "Pair Sphero to computer via Bluetooth Manager first."
+					print "Then, try to select address again."
 				msgutil.send_message(request, json.dumps(jDev)) #serialize list into JSON and send over the socket
 			elif (command == "cancelListDevices"):
 				print "cancel device search"
