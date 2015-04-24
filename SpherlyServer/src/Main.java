@@ -13,7 +13,16 @@ public class Main {
     private JScrollPane scrollPane;
     private JFrame mainFrame;
 
-    public Main() {
+    public Main() throws IOException {
+    	try{
+    	ClientHTTPServer clientServer = new ClientHTTPServer(8000);
+    	clientServer.start();
+    	}catch(IOException e){
+    		System.out.println("Failed to start client server... exiting");
+    		throw e;
+    		//System.exit(0);
+    	}
+    	
         mainFrame = new JFrame();
         mainFrame.setBounds(new Rectangle(new Dimension(500, 400)));
         mainFrame.setBackground(Color.BLACK);

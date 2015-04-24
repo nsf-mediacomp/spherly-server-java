@@ -1,0 +1,382 @@
+<html>
+	<head>
+		<!--68:86:E7:01:25:13-->
+		<title>spherly</title>
+		
+		<script type="text/javascript" src="jquery.js"></script>
+		<script type="text/javascript" src="Sphero.js"></script>
+		<script type="text/javascript" src="blockly/blockly_compressed.js"></script>
+		<script type="text/javascript" src="blockly/javascript_compressed.js"></script>
+		<script type="text/javascript" src="blockly/blocks_compressed.js"></script>
+		<script type="text/javascript" src="sphero_blocks.js"></script>
+		<!--default to english language-->
+		<script type="text/javascript" src="msg/js/en.js"></script>
+		<script type="text/javascript" src="msg/spherly/en.js"></script>
+		<!--end language script srcs-->
+		<script type="text/javascript" src="runblockly.js"></script>
+		<script type="text/javascript" src="language.js"></script>
+		<script type="text/javascript" src="runblockly_program_execution.js"></script>
+		<script type="text/javascript" src="runblockly_utils.js"></script>
+		
+		<link rel="icon" type="image/ico" href="favicon.ico">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>	
+		<div align="left" style="height: 116px">	
+			<!--<button type="button" onclick="SpheroManager.exportXml()" id="exportButton">Export Blocks</button>-->
+			&nbsp;
+			<span id="title">Spherly: Program Your Sphero</span>
+			<br/>
+			&nbsp;&nbsp;
+			<button type="button" id="openProjectButton" onclick="SpheroManager.openProject();">
+				Open Project
+			</button>
+			<button type="button" id="saveProjectButton" onclick="SpheroManager.saveProject();">
+				Save Project
+			</button>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<button type="button" class="primary" onclick="tryTo(SpheroManager.run)" id="runButton" style="margin-left:7px;" disabled=true>
+				&#9654; Run Program
+			</button>
+			<button type="button" class="primary" onclick="tryTo(SpheroManager.stop)" id="stopButton" disabled=true>
+				Stop
+			</button>
+			<br/>
+			<button onclick="tryTo(SpheroManager.selectSphero)" id="selectButton">Select Address</button>
+			<input type="text" id="spheroAddress" value="00:06:66:4B:9F:D7">
+			<button type="button" onclick="tryTo(SpheroManager.connect);" id="connectButton">Connect</button>
+			<button type="button" onclick="tryTo(SpheroManager.disconnect);" id="disconnectButton" disabled=true>Disconnect</button>
+			<button type="button" onclick="tryTo(SpheroManager.sleep);" id="sleepButton" disabled=true>Sleep</button>
+			&nbsp;&nbsp;&nbsp;&nbsp;
+			&nbsp;&nbsp;&nbsp;&nbsp;
+			<button type="button" onclick="tryTo(SpheroManager.calibrate);" id="calibrateButton" disabled=true>Calibrate</button>
+		</div>
+		<div align="right">
+			<div id="languageMenuContainer">
+				<span id="languageTitle">Language:</span>
+				<select id="languageMenu">
+				</select>
+			</div>
+		</div>
+		<!--<div align="center">
+			Heading: 
+			<input disabled=true type="range" id="spheroHeading" min="0" max="35" onmousedown="sphero.setBackLED(255);" onmouseup="sphero.setBackLED(0);this.value=this.max/2;" 
+				onchange="setHeading(this.value);">
+		</div>
+		???-->
+		<div id="blocklyDiv"></div>
+		<div id="dialog" style="display:none;">
+			<div id="dialogTitle">
+				<span id="titleText"></span>
+				<div id="closeDialogButton" title="Close the dialog"> X </div>
+			</div>
+			<div id="dialogBody"></div>
+		</div>
+		<div id="hoverMessage">
+		</div>
+	
+<xml id="toolbox" style="display: none">
+	<category name="Sphero Events">
+		<block type="sphero_run">
+		</block>
+		<block type="sphero_event">
+		</block>
+	</category>
+	<category name="Sphero Commands">
+		<block type="sphero_set_rgb">
+			<value name="COLOUR">
+			  <block type="colour_picker">
+				<field name="COLOUR">#ff0000</field>
+			  </block>
+			</value>
+		</block>
+		<block type="sphero_rollForward"></block>
+		<block type="sphero_rollForwardTimed">
+			<value name="TIME">
+				<block type="math_number">
+					<field name="NUM">1</field>
+				</block>
+			</value>
+		</block>
+		<block type="sphero_roll">
+			<value name="HEADING">
+			  <block type="math_number">
+				<field name="NUM">0</field>
+			  </block>
+			</value>
+		</block>
+		<block type="sphero_turn">
+			<value name="DIRECTION">
+			  <block type="math_number">
+				<field name="NUM">180</field>
+			  </block>
+			</value>
+		</block>
+		<block type="sphero_turnTimed">
+			<value name="DIRECTION">
+			  <block type="math_number">
+				<field name="NUM">180</field>
+			  </block>
+			</value>
+			<value name="TIME">
+			  <block type="math_number">
+				<field name="NUM">1</field>
+			  </block>
+			</value>
+		</block>
+		<block type="sphero_stop"></block>
+		<block type="sphero_set_back_led">
+			<value name="BRIGHTNESS">
+			  <block type="math_number">
+				<field name="NUM">127</field>
+			  </block>
+			</value>
+		</block>
+		<block type="sphero_calibrate">
+			<value name="TIME">
+				<block type="math_number">
+					<field name="NUM">10</field>
+				</block>
+			</value>
+		</block>
+		<block type="sphero_set_speed">
+			<value name="SPEED">
+			  <block type="math_number">
+				<field name="NUM">100</field>
+			  </block>
+			</value>
+		</block>
+		<block type="sphero_wait">
+			<value name="TIME">
+			  <block type="math_number">
+				<field name="NUM">1</field>
+			  </block>
+			</value>
+		</block>
+	</category>
+    <category name="Logic">
+      <block type="controls_if"></block>
+      <block type="logic_compare"></block>
+      <block type="logic_operation"></block>
+      <block type="logic_negate"></block>
+      <block type="logic_boolean"></block>
+      <block type="logic_null"></block>
+      <block type="logic_ternary"></block>
+    </category>
+    <category name="Loops">
+      <block type="controls_repeat_ext">
+        <value name="TIMES">
+          <block type="math_number">
+            <field name="NUM">10</field>
+          </block>
+        </value>
+      </block>
+      <block type="controls_whileUntil"></block>
+      <block type="controls_for">
+        <value name="FROM">
+          <block type="math_number">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+        <value name="TO">
+          <block type="math_number">
+            <field name="NUM">10</field>
+          </block>
+        </value>
+        <value name="BY">
+          <block type="math_number">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+      </block>
+      <block type="controls_forEach"></block>
+      <block type="controls_flow_statements"></block>
+    </category>
+    <category name="Math">
+      <block type="math_number"></block>
+      <block type="math_arithmetic"></block>
+      <block type="math_single"></block>
+      <block type="math_trig"></block>
+      <block type="math_constant"></block>
+      <block type="math_number_property"></block>
+      <block type="math_change">
+        <value name="DELTA">
+          <block type="math_number">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+      </block>
+      <block type="math_round"></block>
+      <block type="math_on_list"></block>
+      <block type="math_modulo"></block>
+      <block type="math_constrain">
+        <value name="LOW">
+          <block type="math_number">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+        <value name="HIGH">
+          <block type="math_number">
+            <field name="NUM">100</field>
+          </block>
+        </value>
+      </block>
+      <block type="math_random_int">
+        <value name="FROM">
+          <block type="math_number">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+        <value name="TO">
+          <block type="math_number">
+            <field name="NUM">100</field>
+          </block>
+        </value>
+      </block>
+      <block type="math_random_float"></block>
+    </category>
+    <!--<category name="Text">
+      <block type="text"></block>
+      <block type="text_join"></block>
+      <block type="text_append">
+        <value name="TEXT">
+          <block type="text"></block>
+        </value>
+      </block>
+      <block type="text_length"></block>
+      <block type="text_isEmpty"></block>
+      <block type="text_indexOf">
+        <value name="VALUE">
+          <block type="variables_get">
+            <field name="VAR">text</field>
+          </block>
+        </value>
+      </block>
+      <block type="text_charAt">
+        <value name="VALUE">
+          <block type="variables_get">
+            <field name="VAR">text</field>
+          </block>
+        </value>
+      </block>
+      <block type="text_getSubstring">
+        <value name="STRING">
+          <block type="variables_get">
+            <field name="VAR">text</field>
+          </block>
+        </value>
+      </block>
+      <block type="text_changeCase"></block>
+      <block type="text_trim"></block>
+      <block type="text_print"></block>
+      <block type="text_prompt"></block>
+    </category>-->
+    <category name="Lists">
+      <block type="lists_create_empty"></block>
+      <block type="lists_create_with"></block>
+      <block type="lists_repeat">
+        <value name="NUM">
+          <block type="math_number">
+            <field name="NUM">5</field>
+          </block>
+        </value>
+      </block>
+      <block type="lists_length"></block>
+      <block type="lists_isEmpty"></block>
+      <block type="lists_indexOf">
+        <value name="VALUE">
+          <block type="variables_get">
+            <field name="VAR">list</field>
+          </block>
+        </value>
+      </block>
+      <block type="lists_getIndex">
+        <value name="VALUE">
+          <block type="variables_get">
+            <field name="VAR">list</field>
+          </block>
+        </value>
+      </block>
+      <block type="lists_setIndex">
+        <value name="LIST">
+          <block type="variables_get">
+            <field name="VAR">list</field>
+          </block>
+        </value>
+      </block>
+      <block type="lists_getSublist">
+        <value name="LIST">
+          <block type="variables_get">
+            <field name="VAR">list</field>
+          </block>
+        </value>
+      </block>
+    </category>
+    <category name="Colour">
+      <block type="colour_picker"></block>
+      <block type="colour_random"></block>
+      <block type="colour_rgb">
+		<value name="RED">
+		  <block type="math_number">
+			<field name="NUM">100</field>
+		  </block>
+		</value>
+		<value name="BLUE">
+		  <block type="math_number">
+			<field name="NUM">50</field>
+		  </block>
+		</value>
+		<value name="GREEN">
+		  <block type="math_number">
+			<field name="NUM">0</field>
+		  </block>
+		</value>
+	  </block>
+	  <block type="colour_hsv">
+		<value name="HUE">
+		  <block type="math_number">
+			<field name="NUM">0</field>
+		  </block>
+		</value>
+		<value name="SATURATION">
+		  <block type="math_number">
+			<field name="NUM">100</field>
+		  </block>
+		</value>
+		<value name="VALUE">
+		  <block type="math_number">
+			<field name="NUM">100</field>
+		  </block>
+		</value>
+	  </block>
+      <block type="colour_blend">
+		<value name="COLOUR1">
+		  <block type="colour_picker">
+			<field name="COLOUR">#ff0000</field>
+		  </block>
+		</value>
+		<value name="COLOUR2">
+		  <block type="colour_picker">
+			<field name="COLOUR">#0000ff</field>
+		  </block>
+		</value>
+		<value name="RATIO">
+		  <block type="math_number">
+			<field name="NUM">0.5</field>
+		  </block>
+		</value>
+	  </block>
+    </category>
+    <category name="Variables" custom="VARIABLE"></category>
+    <category name="Functions" custom="PROCEDURE"></category>
+</xml>
+
+
+	<a id="export" download="" href="#" style="display:none;"></a>
+
+		<script type="text/javascript">
+			Blockly.inject(document.getElementById('blocklyDiv'), {path: 'blockly/', toolbox: document.getElementById('toolbox')});
+		</script>
+	</body>
+</html>
