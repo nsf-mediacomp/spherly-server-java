@@ -26,23 +26,15 @@ public class ClientHTTPServer {
 	
     static class MyHandler implements HttpHandler {
         public void handle(HttpExchange t) throws IOException {
-            /*URI uri = t.getRequestURI();
-            String response = "Path: " + uri.getPath() + "\n";
-            t.sendResponseHeaders(200, response.length());
-            OutputStream os = t.getResponseBody();
-            os.write(response.getBytes());
-            os.close();*/
         	
             String root = "/www/";
             
             URI uri = t.getRequestURI();
-            //File file = new File(root + uri.getPath()).getCanonicalFile();
             
             InputStream fileS = ClientHTTPServer.class.getResourceAsStream(root + uri.getPath());
 
-            //if (!file.getPath().startsWith(root)) {
             if (fileS == null) {
-			  String response = "404 (Forbidden)\n";
+			  String response = "404 (Not Found)\n";
 			  t.sendResponseHeaders(404, response.length());
 			  OutputStream os = t.getResponseBody();
 			  os.write(response.getBytes());
@@ -51,7 +43,6 @@ public class ClientHTTPServer {
               // Object exists and is a file: accept with response code 200.
               t.sendResponseHeaders(200, 0);
               OutputStream os = t.getResponseBody();
-              //FileInputStream fs = new FileInputStream(fileS);
               final byte[] buffer = new byte[0x10000];
               int count = 0;
               while ((count = fileS.read(buffer)) >= 0) {
