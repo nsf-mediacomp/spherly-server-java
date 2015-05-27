@@ -1,3 +1,14 @@
+import java.awt.Color;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Vector;
+
+import javax.bluetooth.RemoteDevice;
+
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -6,38 +17,41 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import javax.bluetooth.RemoteDevice;
-import java.awt.*;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.util.Iterator;
-import java.util.Vector;
-
 public class SpherlyWebSocketServer extends WebSocketServer {
     private Sphero sp;
+    private int sphero_index;
+    private HashMap<Integer, Sphero> spheros;
     private Vector<RemoteDevice> sp_devices;
     private Object lock;
     private Main commandPrompt;
+    public boolean webclientConnectedToSphero;
+    public String test_message = "test";
+    public bluecoveRFCOMM comm;
 
     private Thread listDevicesThread;
-    private Thread connectionThread;
 
     public SpherlyWebSocketServer(Main commandPrompt) throws UnknownHostException {
         super(new InetSocketAddress(8080));
         this.commandPrompt = commandPrompt;
         displayMessage("Server is up!");
 
+        comm = new bluecoveRFCOMM(this);
+
         lock = new Object();
-        sp = new Sphero(this);
+        spheros = new HashMap<Integer, Sphero>();
+        spheros.put(0, new Sphero(this, 0));
+        sphero_index = 0;
+        sp = spheros.get(sphero_index);
         sp_devices = null;
     }
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         displayMessage("Connected to webclient!");
-        sp = new Sphero(this);
+        spheros = new HashMap<Integer, Sphero>();
+        spheros.put(0, new Sphero(this, 0));
+        sphero_index = 0;
+        webclientConnectedToSphero = false;
     }
 
     @Override
@@ -45,6 +59,9 @@ public class SpherlyWebSocketServer extends WebSocketServer {
         displayMessage("Disconnected from webclient");
         sp.disconnect();
         sp = null;
+        spheros = new HashMap<Integer, Sphero>();
+        sphero_index = 0;
+        webclientConnectedToSphero = false;
     }
 
     @Override
@@ -62,6 +79,8 @@ public class SpherlyWebSocketServer extends WebSocketServer {
 
         //Respond to the command
         String command = (String) data.get("command");
+        int id = (int)data.get("id");
+        sp = spheros.get(id);
         //System.out.println("Command: " + command);
         if (command.equals("listDevices")) {
             class ListDevicesThread extends Thread {
@@ -100,42 +119,19 @@ public class SpherlyWebSocketServer extends WebSocketServer {
 
                 public void run() {
                     try {
-                        JSONObject response = connectToDevice(data);
+                        JSONObject response = connectToDevice(data, conn);
                         conn.send(response.toJSONString());
                     } catch (NullPointerException e) {
 
                     }
-
-                    final WebSocket connection = conn;
-                    Sphero.SpheroHandler onPowerNotification = new Sphero.SpheroHandler() {
-                        public void handle(byte data) {
-                            JSONObject response = new JSONObject();
-                            response.put("power", true);
-                            response.put("data", data);
-                            if (data == 1) {
-                                displayMessage("battery charging");
-                            } else if (data == 3) {
-                                displayMessage("battery low");
-                            } else if (data == 4) {
-                                displayMessage("battery critical!");
-                            }
-
-                            connection.send(response.toJSONString());
-                        }
-
-                        public void handle() {
-                        }
-                    };
-                    sp.setPowerNotificationHandler(onPowerNotification);
-                    sp.enablePowerNotification(true);
                 }
             }
-            connectionThread = new ConnectionThread(data, conn);
-            connectionThread.start();
+            sp.connectionThread = new ConnectionThread(data, conn);
+            sp.connectionThread.start();
         } else if (command.equals("cancelConnection")) {
             displayMessage("cancel attempted connection");
-            connectionThread.interrupt();
-            connectionThread = null;
+            sp.connectionThread.interrupt();
+            sp.connectionThread = null;
         } else if (command.equals("disconnect")) {
             try {
                 sp.disconnect();
@@ -207,16 +203,11 @@ public class SpherlyWebSocketServer extends WebSocketServer {
             sp.enableCollisionDetection(value);
 
             if (value) {
-                final WebSocket connection = conn;
-
-                Sphero.SpheroHandler onCollide = new Sphero.SpheroHandler() {
+                Sphero.SpheroHandler onCollide = new Sphero.SpheroHandler(conn, this) {
                     public void handle() {
                         JSONObject response = new JSONObject();
                         response.put("collision", true);
-                        connection.send(response.toJSONString());
-                    }
-
-                    public void handle(byte data) {
+                        this.conn.send(response.toJSONString());
                     }
                 };
                 sp.setCollisionHandler(onCollide);
@@ -252,7 +243,7 @@ public class SpherlyWebSocketServer extends WebSocketServer {
     public JSONArray listDevices(JSONObject data) {
         displayMessage("searching for spheros...");
         try {
-            sp_devices = sp.findSpheros(true);
+            sp_devices = Sphero.FindSpheros(true, this);
 
             JSONArray jsonDevices = new JSONArray();
             if (sp_devices.size() == 0) {
@@ -280,20 +271,94 @@ public class SpherlyWebSocketServer extends WebSocketServer {
         }
     }
 
-    public JSONObject connectToDevice(JSONObject data) {
+    public JSONObject connectToDevice(JSONObject data, WebSocket conn) {
         String name = (String) data.get("name");
         String address = (String) data.get("address");
         address = unformatBluetoothAddress(address);
+        
+        SetUpNotificationHandlers(conn);
 
         JSONObject json = new JSONObject();
         if (sp.connect(address)) {
             json.put("connected", true);
             displayMessage("Connection successful");
+
+            sp.setInactivityTimeout(6000);
+            webclientConnectedToSphero = true;
         } else {
             json.put("connected", false);
             displayMessage("Connection NOT successful");
+            webclientConnectedToSphero = false;
         }
+   
         return json;
+    }
+    
+    public void SetUpNotificationHandlers(WebSocket connection){
+        Sphero.SpheroHandler onPowerNotification = new Sphero.SpheroHandler(connection, this) {
+            public void handle(byte data) {
+                JSONObject response = new JSONObject();
+                response.put("power", true);
+                response.put("data", data);
+                if (data == 1) {
+                    displayMessage("battery charging");
+                } else if (data == 3) {
+                    displayMessage("battery low");
+                } else if (data == 4) {
+                    displayMessage("battery critical!");
+                }
+
+                this.conn.send(response.toJSONString());
+            }
+
+            public void handle(boolean data){}
+            public void handle() {}
+        };
+        sp.setPowerNotificationHandler(onPowerNotification);
+        sp.enablePowerNotification(true);
+        
+        test_message = "test";
+        Sphero.SpheroHandler onConnectionError = new Sphero.SpheroHandler(connection, this){
+        	public void handle(boolean data){
+        		boolean isConnected = data;
+        		System.out.println("Is connected: " + isConnected);
+        		System.out.println("Is WebClient connected: " + server.webclientConnectedToSphero);
+        		System.out.println("test message: " + server.test_message);
+        		if (!isConnected && server.webclientConnectedToSphero){
+        			//The server disconnected from the Sphero, but the web-client hasn't requested it to!
+        			//SO let's try to Gracefully(ish) reconnect
+        			displayMessage("Sphero connection interrupted.");
+        			JSONObject warning = new JSONObject();
+        			warning.put("power", true);
+        			warning.put("data", -99);
+        			this.conn.send(warning.toJSONString());
+        			
+        			int reconnectAttempts = 0;
+        			int reconnectAttemptLimit = 3;
+        			while (!server.sp.isConnected()){
+        				if (++reconnectAttempts > reconnectAttemptLimit){
+        					warning = new JSONObject();
+        					warning.put("power",  true);
+        					warning.put("data", -100);
+        					displayMessage("Reached reconnection attempt limit. Giving up :(.");
+        					break;
+        				}
+        				displayMessage("Attempting reconnection... Attempt: " + reconnectAttempts);
+        				if (server.sp.reconnect()){
+        					displayMessage("Successful reconnection.");
+        					warning = new JSONObject();
+        					warning.put("power", true);
+        					warning.put("data", 99);
+        				}
+        			}
+        		}
+        	}
+        	
+        	public void handle(byte data){}
+        	public void handle(){}
+        };
+        sp.setConnectionErrorHandler(onConnectionError);
+        test_message = "test change";
     }
 
     public String formatAddress(String ba) {

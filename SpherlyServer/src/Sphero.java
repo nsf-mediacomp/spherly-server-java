@@ -1,25 +1,35 @@
-import javax.bluetooth.RemoteDevice;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.Vector;
 
+import javax.bluetooth.RemoteDevice;
+
+import org.java_websocket.WebSocket;
+
 
 public class Sphero {
-    private bluecoveRFCOMM comm;
+	private int id;
     private byte packet_number = 0;
     private boolean is_connected = false;
     private boolean enable_collision_detection = false;
     private SpheroHandler OnCollision = null;
     private boolean enable_power_notification = false;
     private SpheroHandler OnPowerNotification = null;
+    private SpheroHandler OnConnectionErrorNotification = null;
     private SpherlyWebSocketServer server = null;
+    private String address = "";
+    private int test_error_limit = 0;
+    private int test_error_counter = 0;
 
     //private onCollision
     private int heading = 0;
+    
+    public Thread connectionThread;
 
-    public Sphero(SpherlyWebSocketServer server) {
-        comm = new bluecoveRFCOMM(server);
+    public Sphero(SpherlyWebSocketServer server, int id) {
+    	this.id = id;
         is_connected = false;
         enable_collision_detection = false;
         OnCollision = null;
@@ -29,10 +39,10 @@ public class Sphero {
         this.server = server;
     }
 
-    public Vector<RemoteDevice> findSpheros(boolean filter) {
+    public static Vector<RemoteDevice> FindSpheros(boolean filter, SpherlyWebSocketServer server) {
         Vector<RemoteDevice> devices;
         try {
-            devices = comm.findDevices();
+            devices = server.comm.findDevices();
             if (!filter) return devices;
             Vector<RemoteDevice> spheros = new Vector<RemoteDevice>();
             for (Iterator<RemoteDevice> i = devices.iterator(); i.hasNext(); ) {
@@ -52,7 +62,8 @@ public class Sphero {
     }
 
     public boolean connect(/*RemoteDevice device/**/String address/**/) {
-        if (comm.connect(address)) {
+        if (server.comm.connect(address)) {
+        	this.address = address;
             is_connected = true;
             startListening();
             OnCollision = null;
@@ -63,14 +74,24 @@ public class Sphero {
             return false;
         }
     }
+    
+    public boolean reconnect(){
+    	if (server.comm.connect(this.address)){
+    		is_connected = true;
+    		return true;
+    	}else{
+    		return false;
+    	}
+    }
 
     public void disconnect() {
         is_connected = false;
-        comm.disconnect();
+        server.webclientConnectedToSphero = false;
+        server.comm.disconnect();
     }
 
     public boolean isConnected() {
-        is_connected = comm.isConnected();
+        is_connected = server.comm.isConnected();
         return is_connected;
     }
 
@@ -119,7 +140,7 @@ public class Sphero {
         byte msbHeading = (byte) (heading >> 8);
         byte[] data = new byte[]{msbHeading, lsbHeading};
         byte[] packet = buildCommand(device, command, data, false);
-        comm.write(packet);
+        server.comm.write(packet);
     }
 
     public void resetHeading(){
@@ -133,7 +154,7 @@ public class Sphero {
         byte flag = 0;
         byte[] data = new byte[]{(byte) red, (byte) green, (byte) blue, flag};
         byte[] packet = buildCommand(device, command, data, false);
-        comm.write(packet);
+        server.comm.write(packet);
     }
 
     public void rollForward(int speed) {
@@ -157,7 +178,7 @@ public class Sphero {
                 (byte) speed, msbHeading, lsbHeading, (byte) state
         };
         byte[] packet = buildCommand(device, command, data, false);
-        comm.write(packet);
+        server.comm.write(packet);
     }
 
     public void turn(int direction) {
@@ -171,7 +192,7 @@ public class Sphero {
         byte command = 0x03;
         byte[] data = new byte[]{(byte) rate};
         byte[] packet = buildCommand(device, command, data, false);
-        comm.write(packet);
+        server.comm.write(packet);
     }
 
     public void stop() {
@@ -189,7 +210,7 @@ public class Sphero {
 
         byte[] data = new byte[]{(byte) flag_data};
         byte[] packet = buildCommand(device, command, data, false);
-        comm.write(packet);
+        server.comm.write(packet);
     }
 
     public void calibrate(boolean flagOn) {
@@ -215,7 +236,8 @@ public class Sphero {
         byte command = 0x25;
         byte[] data = new byte[]{(byte) time};
         byte[] packet = buildCommand(device, command, data, false);
-        comm.write(packet);
+        System.out.println("setting inactivity timeout to: " + time + " seconds");
+        server.comm.write(packet);
     }
 
     public void sleep() {
@@ -223,7 +245,7 @@ public class Sphero {
         byte command = 0x22;
         byte[] data = new byte[]{0x00, 0x00, 0x00, 0x00, 0x00};
         byte[] packet = buildCommand(device, command, data, false);
-        comm.write(packet);
+        server.comm.write(packet);
     }
 
     public void setBackLED(int brightness) {
@@ -231,7 +253,7 @@ public class Sphero {
         byte command = 0x21;
         byte[] data = new byte[]{(byte) brightness};
         byte[] packet = buildCommand(device, command, data, false);
-        comm.write(packet);
+        server.comm.write(packet);
     }
 
     //Dealing with responses from the sphero device
@@ -249,7 +271,7 @@ public class Sphero {
 
         byte[] data = new byte[]{(byte) enable_data, Xt, Xspd, Yt, Yspd, (byte) dead};
         byte[] packet = buildCommand(device, command, data, false);
-        comm.write(packet);
+        server.comm.write(packet);
     }
 
     public void enablePowerNotification(boolean enable) {
@@ -260,13 +282,19 @@ public class Sphero {
         if (enable) enable_data = 1;
         byte[] data = new byte[]{(byte) enable_data};
         byte[] packet = buildCommand(device, command, data, false);
-        comm.write(packet);
+        server.comm.write(packet);
     }
 
-    interface SpheroHandler {
-        public void handle();
-
-        public void handle(byte data);
+    static class SpheroHandler {
+    	WebSocket conn;
+    	SpherlyWebSocketServer server;
+    	public SpheroHandler(WebSocket conn, SpherlyWebSocketServer server){
+    		this.conn = conn;
+    		this.server = server;
+    	}
+        public void handle(){};
+        public void handle(boolean data){};
+        public void handle(byte data){};
     }
 
     public void setCollisionHandler(SpheroHandler handler) {
@@ -276,9 +304,13 @@ public class Sphero {
     public void setPowerNotificationHandler(SpheroHandler handler) {
         OnPowerNotification = handler;
     }
+    
+    public void setConnectionErrorHandler(SpheroHandler handler){
+    	OnConnectionErrorNotification = handler;
+    }
 
     interface SpheroListener extends Runnable {
-        public byte[] readComm(int length);
+        public byte[] readComm(int length) throws IOException;
 
         public void listen();
     }
@@ -286,70 +318,86 @@ public class Sphero {
     public void startListening() {
         final Sphero self = this;
         SpheroListener listener = new SpheroListener() {
-            public byte[] readComm(int length) {
-                byte[] packet = comm.read(length);
+            public byte[] readComm(int length) throws IOException{
+                byte[] packet = server.comm.read(length);
                 return packet;
             }
 
             public void listen() {
                 displayMessage("listening to sphero...");
-                while (self.isConnected()) {
-                    try {
-                        byte[] header = readComm(5);
-                        /*StringBuilder sb = new StringBuilder();
-					    for (byte b : header) {
-					        sb.append(String.format("%02X ", b));
-					    }
-					    displayMessage(sb.toString());*/
-                        //sphero response packet
-                        //http://orbotixinc.github.io/Sphero-Docs/docs/sphero-api/packet-structures.html
-                        if (header == null) continue;
-
-                        byte sop1 = header[0];
-                        byte sop2 = header[1];
-
-                        //malformed packet
-                        if (sop1 != (byte) 0xff) {
-                            continue;
-                        }
-
-                        if (sop2 == (byte) 0xff) { //response
-                            int dlen = header[4];
-                            displayMessage("response. reading: " + dlen);
-                            readComm(dlen);
-                        } else if (sop2 == (byte) 0xfe) { //async packet
-                            byte idCode = header[2];
-
-                            if (idCode == (byte) 0x07) { //collision detection
-                                //displayMessage("Collision detected");
-                                if (self.enable_collision_detection && self.OnCollision != null) {
-                                    self.OnCollision.handle();
-                                }
-                            }
-
-                            int msbDlen = header[3] << 8;
-                            int lsbDlen = header[4];
-                            int dlen = msbDlen + lsbDlen;
-                            byte[] response = readComm(dlen);
-                            if (response == null) continue;
-                            if (idCode == (byte) 0x01) { //power notification!
-                                if (self.enable_power_notification) {
-                                    //displayMessage("Power notification: " + (int)response[0]);
-                                    self.OnPowerNotification.handle(response[0]);
-                                }
-                            }
-                            if (idCode == (byte) 0x07 && response.length >= 12) {
-                                //displayMessage("speed: "+(int)response[11]);
-                            }
-                        }
-
-                    } catch (Exception e) {
-                        StringWriter sw = new StringWriter();
-                        PrintWriter pw = new PrintWriter(sw);
-                        e.printStackTrace(pw);
-                        server.displayError(sw.toString());
-                    }
+                boolean exceptionErrorOccurred = true;
+                
+                while (exceptionErrorOccurred){
+	                while (self.isConnected()) {
+	                    try {
+	                    	//DEBUGGING CONNECTION ERRORS (stream closed)
+	                    	if (test_error_counter < test_error_limit){
+	                    		test_error_counter++;
+	                    		throw new Exception("Jake Trower - testing stream closed");
+	                    	}
+	                    	
+	                        byte[] header = readComm(5);
+	                        /*StringBuilder sb = new StringBuilder();
+						    for (byte b : header) {
+						        sb.append(String.format("%02X ", b));
+						    }
+						    displayMessage(sb.toString());*/
+	                        //sphero response packet
+	                        //http://orbotixinc.github.io/Sphero-Docs/docs/sphero-api/packet-structures.html
+	                        if (header == null) continue;
+	
+	                        byte sop1 = header[0];
+	                        byte sop2 = header[1];
+	
+	                        //malformed packet
+	                        if (sop1 != (byte) 0xff) {
+	                            continue;
+	                        }
+	
+	                        if (sop2 == (byte) 0xff) { //response
+	                            int dlen = header[4];
+	                            displayMessage("response. reading: " + dlen);
+	                            readComm(dlen);
+	                        } else if (sop2 == (byte) 0xfe) { //async packet
+	                            byte idCode = header[2];
+	
+	                            if (idCode == (byte) 0x07) { //collision detection
+	                                //displayMessage("Collision detected");
+	                                if (self.enable_collision_detection && self.OnCollision != null) {
+	                                    self.OnCollision.handle();
+	                                }
+	                            }
+	
+	                            int msbDlen = header[3] << 8;
+	                            int lsbDlen = header[4];
+	                            int dlen = msbDlen + lsbDlen;
+	                            byte[] response = readComm(dlen);
+	                            if (response == null) continue;
+	                            if (idCode == (byte) 0x01) { //power notification!
+	                                if (self.enable_power_notification) {
+	                                    //displayMessage("Power notification: " + (int)response[0]);
+	                                    self.OnPowerNotification.handle(response[0]);
+	                                }
+	                            }
+	                            if (idCode == (byte) 0x07 && response.length >= 12) {
+	                                //displayMessage("speed: "+(int)response[11]);
+	                            }
+	                        }
+	                        exceptionErrorOccurred = false;
+	                    } catch (Exception e) {
+	                        StringWriter sw = new StringWriter();
+	                        PrintWriter pw = new PrintWriter(sw);
+	                        e.printStackTrace(pw);
+	                        server.displayError(sw.toString());
+	                        exceptionErrorOccurred = true;
+	                    }
+	                }
+	                if (exceptionErrorOccurred){
+	                    self.OnConnectionErrorNotification.handle(self.isConnected());
+	                    exceptionErrorOccurred = false;
+	                }
                 }
+          
                 displayMessage("end listening...");
             }
 
