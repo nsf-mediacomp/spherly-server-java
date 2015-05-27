@@ -1,29 +1,12 @@
 .metadata
-BluetoothTest
-DrawrServer
-Grimoire
-KittyPaint
-libraries
-LegoServer
-NPCQuest
-PixelPets
-screenshots
-Semaphores
-UDPClient
-UDPServer
 /SpherlyServer/bin
 /JavaWebSocket/bin
-
+__Linux/*.pyc
 
 # Eclipse
 .classpath
 .project
 .settings/
-
-# Intellij
-.idea/
-*.iml
-*.iws
 
 # Mac
 .DS_Store

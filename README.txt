@@ -1,6 +1,6 @@
 See releases for server downloads
 		
-(Spherly web client can be found in SpherlyServer/assets/www )
+(Spherly web client can be found in SpherlyServer/assets/www)
 
 NOTE: If building on eclipse on your computer, make sure to select the appropriate bluecove jar from the SpherlyServer/lib directory:
 	(Windows: bluecove-2.1.1.jar)

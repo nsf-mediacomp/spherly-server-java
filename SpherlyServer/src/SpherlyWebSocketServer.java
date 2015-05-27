@@ -79,7 +79,10 @@ public class SpherlyWebSocketServer extends WebSocketServer {
 
         //Respond to the command
         String command = (String) data.get("command");
-        int id = (int)data.get("id");
+        int id = 0;
+        try{
+        	id = (int)data.get("id");
+        }catch(Exception e){}
         sp = spheros.get(id);
         //System.out.println("Command: " + command);
         if (command.equals("listDevices")) {
