@@ -1,0 +1,56 @@
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <block type="sphero_run" id="1" x="55" y="9">
+    <statement name="DO">
+      <block type="controls_repeat_ext" id="24" inline="true">
+        <value name="TIMES">
+          <block type="math_number" id="25">
+            <field name="NUM">3</field>
+          </block>
+        </value>
+        <statement name="DO">
+          <block type="controls_for" id="35" inline="true">
+            <field name="VAR">i</field>
+            <value name="FROM">
+              <block type="math_number" id="36">
+                <field name="NUM">0</field>
+              </block>
+            </value>
+            <value name="TO">
+              <block type="math_number" id="37">
+                <field name="NUM">100</field>
+              </block>
+            </value>
+            <value name="BY">
+              <block type="math_number" id="38">
+                <field name="NUM">1</field>
+              </block>
+            </value>
+            <statement name="DO">
+              <block type="sphero_set_rgb" id="51" inline="false">
+                <value name="COLOUR">
+                  <block type="colour_hsv" id="79" inline="false">
+                    <value name="HUE">
+                      <block type="variables_get" id="87">
+                        <field name="VAR">i</field>
+                      </block>
+                    </value>
+                    <value name="SATURATION">
+                      <block type="math_number" id="81">
+                        <field name="NUM">100</field>
+                      </block>
+                    </value>
+                    <value name="VALUE">
+                      <block type="math_number" id="82">
+                        <field name="NUM">100</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+              </block>
+            </statement>
+          </block>
+        </statement>
+      </block>
+    </statement>
+  </block>
+</xml>

@@ -1,0 +1,48 @@
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <block type="sphero_run" id="37" x="26" y="7">
+    <statement name="DO">
+      <block type="controls_repeat_ext" id="188" inline="true">
+        <value name="TIMES">
+          <block type="math_number" id="189">
+            <field name="NUM">2</field>
+          </block>
+        </value>
+        <statement name="DO">
+          <block type="sphero_rollForward" id="116">
+            <next>
+              <block type="sphero_wait" id="150" inline="true">
+                <value name="TIME">
+                  <block type="math_number" id="151">
+                    <field name="NUM">1</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="sphero_stop" id="164">
+                    <next>
+                      <block type="sphero_wait" id="177" inline="true">
+                        <value name="TIME">
+                          <block type="math_number" id="178">
+                            <field name="NUM">0.5</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="sphero_turn" id="202" inline="true">
+                            <value name="DIRECTION">
+                              <block type="math_number" id="203">
+                                <field name="NUM">180</field>
+                              </block>
+                            </value>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </statement>
+  </block>
+</xml>

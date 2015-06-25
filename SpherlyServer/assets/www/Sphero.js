@@ -9,7 +9,7 @@ function SpheroConnection(url) {
 		this.socket.onclose = function(){
 			self.isConnected = false;
 			SpheroManager.disconnect();
-			SpheroManager.alertMessage("Server Down", "Error connecting to server.<br/><br/>Server may be down.", "<div id='dialogButton' onclick='Utils.closeDialog();'>OK</div>");			
+			SpheroManager.alertMessage("Server Down", "Error connecting to server.<br/><br/>Server may be down.<br><br>Make sure server is running or download <a href='http://tinyurl.com/spherly-server'>here</a>", "<div id='dialogButton' onclick='Utils.closeDialog();'>OK</div>");			
 		}
 	}
 	//turns the command object into a JSON string before sending

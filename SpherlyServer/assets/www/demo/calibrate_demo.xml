@@ -1,0 +1,22 @@
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <block type="sphero_run" id="1" x="69" y="65">
+    <statement name="DO">
+      <block type="sphero_calibrate" id="40" inline="true">
+        <value name="TIME">
+          <block type="math_number" id="41">
+            <field name="NUM">5</field>
+          </block>
+        </value>
+        <next>
+          <block type="sphero_rollForwardTimed" id="20" inline="true">
+            <value name="TIME">
+              <block type="math_number" id="21">
+                <field name="NUM">1</field>
+              </block>
+            </value>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>

@@ -118,7 +118,7 @@ SpheroManager.openProject = function(){
 		if (value in SpheroManager.example_projects){
 			$(textarea).html(example_projects[value]);
 		}else{
-			$.get("../demo/"+value+".xml", function(data){
+			$.get("./demo/"+value+".xml", function(data){
 				data = Utils.xmlToString(data);
 				SpheroManager.example_projects[value] = data;
 				$(textarea).html(data);

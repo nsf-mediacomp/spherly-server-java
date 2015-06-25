@@ -1,0 +1,99 @@
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <block type="sphero_run" id="3" deletable="false" x="44" y="40">
+    <statement name="DO">
+      <block type="procedures_callnoreturn" id="4" inline="false">
+        <mutation name="roll in a square spiral">
+          <arg name="time"></arg>
+        </mutation>
+        <value name="ARG0">
+          <block type="math_number" id="5">
+            <field name="NUM">0.2</field>
+          </block>
+        </value>
+      </block>
+    </statement>
+  </block>
+  <block type="procedures_defnoreturn" id="6" x="434" y="20">
+    <mutation>
+      <arg name="time"></arg>
+    </mutation>
+    <field name="NAME">roll in a square spiral</field>
+    <statement name="STACK">
+      <block type="procedures_ifreturn" id="7" inline="true">
+        <mutation value="0"></mutation>
+        <value name="CONDITION">
+          <block type="logic_compare" id="8" inline="true">
+            <field name="OP">GT</field>
+            <value name="A">
+              <block type="variables_get" id="9">
+                <field name="VAR">time</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number" id="10">
+                <field name="NUM">1</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <next>
+          <block type="sphero_turn" id="11" inline="true">
+            <value name="DIRECTION">
+              <block type="math_number" id="12">
+                <field name="NUM">90</field>
+              </block>
+            </value>
+            <next>
+              <block type="sphero_rollForward" id="13">
+                <next>
+                  <block type="sphero_wait" id="14" inline="true">
+                    <value name="TIME">
+                      <block type="variables_get" id="15">
+                        <field name="VAR">time</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="sphero_stop" id="16">
+                        <next>
+                          <block type="sphero_wait" id="17" inline="true">
+                            <value name="TIME">
+                              <block type="math_number" id="18">
+                                <field name="NUM">0.5</field>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="procedures_callnoreturn" id="19" inline="false">
+                                <mutation name="roll in a square spiral">
+                                  <arg name="time"></arg>
+                                </mutation>
+                                <value name="ARG0">
+                                  <block type="math_arithmetic" id="20" inline="true">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="variables_get" id="21">
+                                        <field name="VAR">time</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="math_number" id="22">
+                                        <field name="NUM">0.1</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>

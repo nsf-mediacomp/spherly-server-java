@@ -1,0 +1,49 @@
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <block type="sphero_run" id="2" x="215" y="7">
+    <statement name="DO">
+      <block type="sphero_set_rgb" id="3" inline="false">
+        <value name="COLOUR">
+          <block type="colour_picker" id="4">
+            <field name="COLOUR">#330033</field>
+          </block>
+        </value>
+        <next>
+          <block type="sphero_set_back_led" id="5" inline="false">
+            <value name="BRIGHTNESS">
+              <block type="math_number" id="6">
+                <field name="NUM">127</field>
+              </block>
+            </value>
+            <next>
+              <block type="controls_repeat_ext" id="81" inline="true">
+                <value name="TIMES">
+                  <block type="math_number" id="82">
+                    <field name="NUM">4</field>
+                  </block>
+                </value>
+                <statement name="DO">
+                  <block type="sphero_turn" id="60" inline="true">
+                    <value name="DIRECTION">
+                      <block type="math_number" id="61">
+                        <field name="NUM">90</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="sphero_wait" id="33" inline="true">
+                        <value name="TIME">
+                          <block type="math_number" id="34">
+                            <field name="NUM">1</field>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>
