@@ -44,7 +44,7 @@
 			</button>
 			<br/>
 			<button onclick="tryTo(SpheroManager.selectSphero)" id="selectButton">Select Address</button>
-			<input type="text" id="spheroAddress" value="00:06:66:4B:9F:D7">
+			<input type="text" id="spheroAddress" value="">
 			<button type="button" onclick="tryTo(SpheroManager.connect);" id="connectButton">Connect</button>
 			<button type="button" onclick="tryTo(SpheroManager.disconnect);" id="disconnectButton" disabled=true>Disconnect</button>
 			<button type="button" onclick="tryTo(SpheroManager.sleep);" id="sleepButton" disabled=true>Sleep</button>
@@ -82,6 +82,9 @@
 		</block>
 		<block type="sphero_event">
 		</block>
+		<block type="sphero_event">
+		  <field name="EVENT">STOP</field>
+	    </block>
 	</category>
 	<category name="Sphero Commands">
 		<block type="sphero_set_rgb">

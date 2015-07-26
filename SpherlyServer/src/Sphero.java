@@ -166,6 +166,7 @@ public class Sphero {
     }
 
     public void roll(int heading, int speed) {
+        heading = (((heading % 360) + 360) % 360);
         roll(heading, speed, 1);
     }
 
@@ -183,7 +184,7 @@ public class Sphero {
 
     public void turn(int direction) {
         heading += direction;
-        heading %= 360;
+        heading = (((heading % 360) + 360) % 360);
         roll(heading, 0, 1);
     }
 

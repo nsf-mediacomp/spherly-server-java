@@ -71,6 +71,36 @@ window.onload = function(){
 	$("#calibrateButton").hover(function(e){
 		openHover(e, Blockly.Msg.CALIBRATE_HOVER);
 	}, closeHover);
+	
+	//LOAD UP EVERYTHING
+	SpheroManager.loadWorkspaceFromLocalStorage();
+	
+	setInterval(SpheroManager.saveWorkspaceToLocalStorage, 10000);
+	window.addEventListener('beforeunload', function(e){
+		SpheroManager.saveWorkspaceToLocalStorage();
+	});
+}
+
+SpheroManager.saveWorkspaceToLocalStorage = function(){
+	console.log("workspace saved.");
+	
+	var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+	xml = Blockly.Xml.domToPrettyText(xml);
+	localStorage.setItem("xml", xml);
+}
+
+SpheroManager.loadWorkspaceFromLocalStorage = function(){
+	var xml = localStorage.getItem("xml");
+	if (xml === undefined || xml === null){		
+		var defaultXml = 
+			'<xml>' +
+			'	<block type="sphero_run" x="70" y="70"></block>' +
+			'</xml>';
+		SpheroManager.loadBlocks(defaultXml);
+		return;
+	}
+	Blockly.mainWorkspace.clear();
+	SpheroManager.loadBlocks(xml);
 }
 
 SpheroManager.example_projects = {};
@@ -119,7 +149,7 @@ SpheroManager.openProject = function(){
 			$(textarea).html(example_projects[value]);
 		}else{
 			$.get("./demo/"+value+".xml", function(data){
-				data = Utils.xmlToString(data);
+				//data = Blockly.Xml.domToText(data);
 				SpheroManager.example_projects[value] = data;
 				$(textarea).html(data);
 			});
