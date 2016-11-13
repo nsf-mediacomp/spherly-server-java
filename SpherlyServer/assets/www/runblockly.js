@@ -11,7 +11,8 @@ window.onload = function(){
 	//in language.js
 	SpheroManager.PopulateLanguageMenu([
 		["English", "en.js"],
-		["Francais", "fr.js"]
+		["Francais", "fr.js"],
+		["Portuguese", "pt.js"]
 	]);
 	//END LANGUAGE
 
