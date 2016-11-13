@@ -1,10 +1,10 @@
 SpheroManager.PopulateLanguageMenu = function(languages){
 	var language_menu = $("#languageMenu");
-	
+
 	for (var i = 0; i < languages.length; i++){
 		var language_name = languages[i][0];
 		var file_name = languages[i][1];
-		
+
 		var option = $(document.createElement('option'));
 		option.attr('value', file_name);
 		option.html(language_name);
@@ -33,21 +33,21 @@ SpheroManager.UpdateLanguageMessages = function(file_name){
 			$("#disconnectButton").html(Blockly.Msg.DISCONNECT);
 			$("#sleepButton").html(Blockly.Msg.SLEEP);
 			$("#calibrateButton").html(Blockly.Msg.CALIBRATE);
-			
+
 			if (SpheroManager.reset_program_text)
 				$("#runButton").html(Blockly.Msg.RESET_PROGRAM);
 			else
 				$("#runButton").html(Blockly.Msg.RUN_PROGRAM);
 			$("#stopButton").html(Blockly.Msg.STOP);
 
-			$("#languageTitle").html(Blockly.Msg.LANGUAGE);	
-			
+			$("#languageTitle").html(Blockly.Msg.LANGUAGE);
+
 			//Now update existing blocks in the workspace to have the correct language
 			var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
 			xml = Blockly.Xml.domToPrettyText(xml);
 			Blockly.mainWorkspace.clear();
 			SpheroManager.loadBlocks(xml);
-			
+
 			//NOW UPDATE BLOCKLY TREE LABELS
 			var labels = $(".blocklyTreeLabel");
 			$(labels[1]).html(Blockly.Msg.SPHERO_EVENTS);

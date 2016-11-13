@@ -2,7 +2,7 @@
 	<head>
 		<!--68:86:E7:01:25:13-->
 		<title>spherly</title>
-		
+
 		<script type="text/javascript" src="jquery.js"></script>
 		<script type="text/javascript" src="Sphero.js"></script>
 		<script type="text/javascript" src="blockly/blockly_compressed.js"></script>
@@ -17,12 +17,12 @@
 		<script type="text/javascript" src="language.js"></script>
 		<script type="text/javascript" src="runblockly_program_execution.js"></script>
 		<script type="text/javascript" src="runblockly_utils.js"></script>
-		
+
 		<link rel="icon" type="image/ico" href="favicon.ico">
 		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
-	<body>	
-		<div align="left" style="height: 116px">	
+	<body>
+		<div align="left" style="height: 116px">
 			<!--<button type="button" onclick="SpheroManager.exportXml()" id="exportButton">Export Blocks</button>-->
 			&nbsp;
 			<span id="title">Spherly: Program Your Sphero</span>
@@ -44,7 +44,7 @@
 			</button>
 			<br/>
 			<button onclick="tryTo(SpheroManager.selectSphero)" id="selectButton">Select Address</button>
-			<input type="text" id="spheroAddress" value="">
+			<input type="text" id="spheroAddress" value="00:06:66:4B:9F:D7">
 			<button type="button" onclick="tryTo(SpheroManager.connect);" id="connectButton">Connect</button>
 			<button type="button" onclick="tryTo(SpheroManager.disconnect);" id="disconnectButton" disabled=true>Disconnect</button>
 			<button type="button" onclick="tryTo(SpheroManager.sleep);" id="sleepButton" disabled=true>Sleep</button>
@@ -60,8 +60,8 @@
 			</div>
 		</div>
 		<!--<div align="center">
-			Heading: 
-			<input disabled=true type="range" id="spheroHeading" min="0" max="35" onmousedown="sphero.setBackLED(255);" onmouseup="sphero.setBackLED(0);this.value=this.max/2;" 
+			Heading:
+			<input disabled=true type="range" id="spheroHeading" min="0" max="35" onmousedown="sphero.setBackLED(255);" onmouseup="sphero.setBackLED(0);this.value=this.max/2;"
 				onchange="setHeading(this.value);">
 		</div>
 		???-->
@@ -75,16 +75,13 @@
 		</div>
 		<div id="hoverMessage">
 		</div>
-	
+
 <xml id="toolbox" style="display: none">
 	<category name="Sphero Events">
 		<block type="sphero_run">
 		</block>
 		<block type="sphero_event">
 		</block>
-		<block type="sphero_event">
-		  <field name="EVENT">STOP</field>
-	    </block>
 	</category>
 	<category name="Sphero Commands">
 		<block type="sphero_set_rgb">
@@ -374,7 +371,6 @@
     <category name="Variables" custom="VARIABLE"></category>
     <category name="Functions" custom="PROCEDURE"></category>
 </xml>
-
 
 	<a id="export" download="" href="#" style="display:none;"></a>
 

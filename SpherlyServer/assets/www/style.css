@@ -47,7 +47,7 @@ th,td{
     left: 25%;
     /*margin-left: -250px;
     margin-top: -150px;*/
-	
+
 	border: 1px solid black;
 	background: #ffffff;
 }
@@ -58,11 +58,11 @@ th,td{
 	height: 28px;
 }
 #closeDialogButton{
-	position:absolute; 
-	right: 3px; 
-	top: 3px; 
-	height: 22px; 
-	width:22px; 
+	position:absolute;
+	right: 3px;
+	top: 3px;
+	height: 22px;
+	width:22px;
 	padding: 0px;
 	cursor: pointer;
 }
@@ -73,9 +73,9 @@ th,td{
 	font-size: 20px;
 }
 #dialogButton{
-	position:absolute; 
-	right: 25px; 
-	bottom: 10px; 
+	position:absolute;
+	right: 25px;
+	bottom: 10px;
 	width: 130px;
 	text-align: center;
 	font-size: 24px;

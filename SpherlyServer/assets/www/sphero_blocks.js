@@ -24,7 +24,7 @@ Blockly.Blocks['sphero_run'] = {
 Blockly.JavaScript['sphero_run'] = function(block) {
   // ONly run the code that is inside this block when run button is pressed (like a main)
   var do_branch = Blockly.JavaScript.statementToCode(block, 'DO');
-  var code = 'SpheroManager.sphero.attachEventHandler("RUN", function(){\n' + 
+  var code = 'SpheroManager.sphero.attachEventHandler("RUN", function(){\n' +
       do_branch +
 	  '\n});\n';
   return code;
@@ -60,7 +60,7 @@ Blockly.Blocks['sphero_event'] = {
 		this.setColour(210);
 		this.appendDummyInput()
 			.appendField(new Blockly.FieldDropdown([
-				[Blockly.Msg.SPHERO_EVENT_COLLISION, 'COLLISION'], 
+				[Blockly.Msg.SPHERO_EVENT_COLLISION, 'COLLISION'],
 				[Blockly.Msg.SPHERO_EVENT_STOP, 'STOP']
 				//[Blockly.Msg.SPHERO_EVENT_END, 'END']
 			]), "EVENT");
@@ -85,7 +85,7 @@ Blockly.JavaScript['sphero_event'] = function(block){
 Blockly.Blocks['sphero_set_back_led'] = {
 	init: function() {
 		this.setHelpUrl(Blockly.Msg.SPHERO_API_HELPURL);
-		this.setColour(0);			
+		this.setColour(0);
 		this.appendValueInput("BRIGHTNESS")
 			.appendField(Blockly.Msg.SPHERO_SETBACKLED_TITLE)
 			.setCheck("Number")
@@ -99,7 +99,7 @@ Blockly.Blocks['sphero_set_back_led'] = {
 Blockly.JavaScript['sphero_set_back_led'] = function(block){
 	var brightness = Blockly.JavaScript.valueToCode(block, 'BRIGHTNESS', Blockly.JavaScript.ORDER_NONE) || 0;
 	var code = "SpheroManager.sphero.setBackLED(" + brightness + ", "+ block.id +");\n";
-	return code;	
+	return code;
 };
 
 Blockly.Blocks['sphero_calibrate'] = {
@@ -125,7 +125,7 @@ Blockly.JavaScript['sphero_calibrate'] = function(block){
 Blockly.Blocks['sphero_set_rgb'] = {
 	init: function() {
 		this.setHelpUrl(Blockly.Msg.SPHERO_API_HELPURL);
-		this.setColour(0);			
+		this.setColour(0);
 		this.appendValueInput("COLOUR")
 			.appendField(Blockly.Msg.SPHERO_SETRGB_TITLE)
 			.setCheck("Colour")
@@ -305,7 +305,7 @@ Blockly.Blocks['sphero_wait'] = {
 			.setCheck("Number")
 			.setAlign(Blockly.ALIGN_CENTRE);
 		this.appendDummyInput().appendField(Blockly.Msg.SPHERO_WAIT_SECONDS);
-			
+
 		this.setInputsInline(true);
 		this.setPreviousStatement(true);
 		this.setNextStatement(true);

@@ -1,4 +1,4 @@
-function SpheroConnection(url) {	
+function SpheroConnection(url) {
 	/* this is essentially a wrapper for the websocket connection.*/
 	this.tryToConnect = function(callback){
 		this.socket = new WebSocket(this.url);
@@ -9,13 +9,13 @@ function SpheroConnection(url) {
 		this.socket.onclose = function(){
 			self.isConnected = false;
 			SpheroManager.disconnect();
-			SpheroManager.alertMessage("Server Down", "Error connecting to server.<br/><br/>Server may be down.<br><br>Make sure server is running or download <a href='http://tinyurl.com/spherly-server'>here</a>", "<div id='dialogButton' onclick='Utils.closeDialog();'>OK</div>");			
+			SpheroManager.alertMessage("Server Down", "Error connecting to server.<br/><br/>Server may be down.", "<div id='dialogButton' onclick='Utils.closeDialog();'>OK</div>");
 		}
 	}
 	//turns the command object into a JSON string before sending
-	this.send = function(data) { 
+	this.send = function(data) {
 		if (!this.isConnected) return;
-	
+
 		if (typeof data === "object") {
 			data = JSON.stringify(data);
 		}
@@ -36,7 +36,7 @@ function SpheroConnection(url) {
 	this.destroyMessageCallback = function(){
 		this.socket.onmessage = function(evt){}
 	}
-	
+
 	//Init
 	var self = this;
 	this.url = url;
@@ -57,7 +57,7 @@ function Sphero(url) {
 	this.back_led_intensity = 0;
 	this.current_colour = Utils.hexToRgb("#ffffff");
 	this.command_queue = [];
-	
+
 	this.stopHandler = null;
 	this.clearEventHandlers = function(){
 		this.runHandler = null;
@@ -93,16 +93,16 @@ function Sphero(url) {
 	};
 	this.powerNotificationHandler = function(){
 		var button = "<div id='dialogButton' onclick='Utils.closeDialog();'>OK</div>";
-		/*if (!this.got_power_notification){
-			SpheroManager.alertMessage("Sphero Off", "Cannot communicate with Sphero.<br/><br/>It may have shut off due to inactivity, lack of battery charge, or may simply be out of range.<br/><br/>Attempting Reconnection.", button);
-			SpheroManager.disconnect();			
+		if (!this.got_power_notification){
+			SpheroManager.alertMessage("Sphero Off", "Cannot communicate with Sphero.<br/><br/>It may have shut off due to inactivity, lack of battery charge, or may simply be out of range.", button);
+			SpheroManager.disconnect();
 			this.stopPowerNotifications();
-		}else{*/
+		}else{
 			this.power_timeout_id = window.setTimeout(this.powerNotificationHandler.bind(this), this.power_timeout);
-		//}
+		}
 		this.got_power_notification = false;
 	};
-	
+
 	this.isConnected = false;
 	this.testConnection = function() {
 		var command = {"command": "test"};
@@ -130,10 +130,10 @@ function Sphero(url) {
 			self.speed = 255;
 			callback(self.isConnected);
 			window.connection.setMessageCallback(self.spheroMessageCallback.bind(self));
-			
-			this.got_power_notification = true;
-			this.power_timeout_id = window.setTimeout(this.powerNotificationHandler.bind(this), this.power_timeout);
 		});
+		this.got_power_notification = true;
+
+		this.power_timeout_id = window.setTimeout(this.powerNotificationHandler.bind(this), this.power_timeout);
 	}
 	this.cancelConnection = function(){
 		var command = {"command": "cancelConnection"};
@@ -142,9 +142,8 @@ function Sphero(url) {
 			data = JSON.parse(data);
 			console.log(data);
 		});
-		this.stopPowerNotifications();
 	}
-	
+
 	this.connectionReset = function(){
 		this.battery_low_notified = false;
 		this.battery_critical_notified = false;
@@ -152,9 +151,9 @@ function Sphero(url) {
 	}
 	this.disconnect = function() {
 		this.stopPowerNotifications();
-		
+
 		this.clearAllCommands();
-	
+
 		var command = {"command": "disconnect" };
 		self.isConnected = false;
 		window.connection.send(command);
@@ -162,25 +161,25 @@ function Sphero(url) {
 	}
 	this.sleep = function() {
 		this.stopPowerNotifications();
-		
+
 		this.clearAllCommands();
-		
+
 		var command = {"command": "sleep"};
 		self.isConnected = false;
 		window.connection.send(command);
 		window.connection.destroyMessageCallback();
 	}
-	
+
 	this.beginCalibrationMode = function(){
 		var command = {"command": "calibrateOn"};
 		window.connection.send(command);
 	}
-	
+
 	this.endCalibrationMode = function(){
 		var command = {"command": "calibrateOff"};
 		window.connection.send(command);
 	}
-	
+
 	//
 	//USER COMMANDS
 	//
@@ -218,7 +217,7 @@ function Sphero(url) {
 	this.stop = function(blockID) {
 		this.command_queue.push(["stop", blockID]);
 	}
-	this.setHeading = function (heading, blockID) {		
+	this.setHeading = function (heading, blockID) {
 		this.command_queue.push(["setHeading", heading, blockID]);
 	}
 	this.setBackLED = function (value, blockID) {
@@ -227,11 +226,11 @@ function Sphero(url) {
 	this.wait = function (seconds, blockID) {
 		this.command_queue.push(["wait", seconds, blockID]);
 	}
-	
+
 	this.timedCalibrate = function(time, blockID){
 		this.command_queue.push(["timedCalibrate", time, blockID]);
 	}
-	
+
 	this.HandleHandler = function(handler){
 		//for infinite loops :_)
 		try{
@@ -245,7 +244,7 @@ function Sphero(url) {
 			}
 		}
 	}
-	
+
 	this.spheroMessageCallback = function(data){
 		var data = JSON.parse(data);
 		if (data['collision']){
@@ -273,23 +272,23 @@ function Sphero(url) {
 			}
 		}
 	}
-	
+
 	this.collisionDetected = function(data){
 		console.log("COLLISION DETECTED: " + this.timeout_id + ", " + this.wait_time + ", " + (Date.now() - this.then));
 		//no commands in queue or no current timeout
 		if (this.timeout_id == null && this.collisionHandler !== null){
 			this.HandleHandler(this.collisionHandler);
 			this.begin_execute(false);
-		}else{					
+		}else{
 			//REMEMBER THE OLD COMMANDS
 			var commands = this.command_queue.splice(0);
-			
+
 			//If the old command was on a timeout, replicate that
 			var now = Date.now();
 			var delta = now - this.then;
 			if (delta < this.wait_time)
 				this.wait_time = (this.wait_time - delta);
-		
+
 			//GIVE PRECENDENCE TO THE COLLISION DETECTION EVENT
 			this.command_queue = [];
 			if (this.collisionHandler !== null)
@@ -299,7 +298,7 @@ function Sphero(url) {
 			for (var i = 0; i < commands.length; i++){
 				this.command_queue.push(commands[i]);
 			}
-			
+
 			//Reset the timeout
 			this.wait_time = 0;
 			clearTimeout(this.timeout_id);
@@ -316,29 +315,29 @@ function Sphero(url) {
 	this.disableCollisionDetection = function(){
 		var command = {"command": "setCollisionDetection", "value": false};
 		this.collisionHandler = null;
-		
+
 		//this.updateConnectionMessageCallback(null);
 		window.connection.send(command);
 	}
-	
+
 	//actual execution and stuff
 	this.stopProgram = function(){
 		this.command_queue = [];
 		clearTimeout(this.timeout_id);
 		this.timeout_id = null;
-		
+
 		var command = {"command": "stop"};
 		window.connection.send(command);
 		if (this.stopHandler !== null)
 			this.HandleHandler(this.stopHandler);
 		this.begin_execute(false);
 	}
-	
+
 	this.clearAllCommands = function(){
 		this.command_queue = [];
 		clearTimeout(this.timeout_id);
 		this.timeout_id = null;
-		
+
 		var command = {"command": "stop"};
 		window.connection.send(command);
 		var command = {"command": "clear"};
@@ -359,14 +358,14 @@ function Sphero(url) {
 		this.timeout_id = null;
 		this.then = Date.now();
 		this.wait_time = this.COMMAND_WAIT_TIME;
-		
+
 		var command = this.command_queue.shift();
 		if (command !== undefined){
 			var block_id = command.splice(command.length-1);
 			if (block_id !== null){
 				Blockly.mainWorkspace.highlightBlock(block_id);
 			}
-			
+
 			switch(command[0]){
 				case "setRGB":
 					var hex = command[1];
@@ -375,7 +374,7 @@ function Sphero(url) {
 					}
 					var colour = Utils.hexToRgb(hex);
 					this.current_colour = colour;
-					var command = {"command": "setRGB", 
+					var command = {"command": "setRGB",
 						"red": colour.r, "green": colour.g, "blue": colour.b};
 					window.connection.send(command);
 					break;
@@ -399,7 +398,7 @@ function Sphero(url) {
 						}.bind(this), this.wait_time);
 					}.bind(this, direction, wait_time_half), wait_time_half);
 					//RETURN HERE TO MAKE THE EXECUTE FUNCTION NOT AUTOMATICALLY EXECUTE THE NEXT COMMAND
-					return; 
+					return;
 				case "setStabilization":
 					var flag = command[1];
 					var command = {"command": "setStabilization", "flag":flag};
@@ -427,8 +426,8 @@ function Sphero(url) {
 						this.execute();
 					}.bind(this), this.wait_time);
 					//RETURN HERE TO MAKE THE EXECUTE FUNCTION NOT AUTOMATICALLY EXECUTE THE NEXT COMMAND
-					return; 
-				case "rollForward":									
+					return;
+				case "rollForward":
 					var command = {"command": "rollForward", "speed": this.speed};
 					window.connection.send(command);
 					break;
@@ -443,8 +442,8 @@ function Sphero(url) {
 						this.execute();
 					}.bind(this), this.wait_time);
 					//RETURN HERE TO MAKE THE EXECUTE FUNCTION NOT AUTOMATICALLY EXECUTE THE NEXT COMMAND
-					return; 
-				case "stop":								
+					return;
+				case "stop":
 					var command = {"command": "stop"};
 					window.connection.send(command);
 					break;
@@ -475,7 +474,7 @@ function Sphero(url) {
 						this.execute();
 					}.bind(this), this.wait_time);
 					//RETURN HERE TO MAKE THE EXECUTE FUNCTION NOT AUTOMATICALLY EXECUTE THE NEXT COMMAND
-					return; 
+					return;
 				//FOR AFTER THE END PROGRAM EVENT HANDLER
 				case "final_end":
 					return;

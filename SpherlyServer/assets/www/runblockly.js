@@ -14,44 +14,44 @@ window.onload = function(){
 		["Francais", "fr.js"]
 	]);
 	//END LANGUAGE
-	
-	
+
+
 	window.connection = new SpheroConnection(url);
 	SpheroManager.sphero = new Sphero();
-	
+
 	Blockly.JavaScript.addReservedWords('SpheroManager');
-	
-	var defaultXml = 
+
+	var defaultXml =
 		'<xml>' +
 		'	<block type="sphero_run" x="260" y="70"></block>' +
 		'</xml>';
 	SpheroManager.loadBlocks(defaultXml);
-	
+
 	/*$("#codeButton").on("click", function(){
 		var generated_code = Blockly.JavaScript.workspaceToCode();
 			generated_code += "if (pixly_run) pixly_run();\n";
 		$("#dialogBody").html("<pre>" + generated_code + "</pre>");
-		
+
 		$("#titleText").html("Generated JavaScript Code");
 		$("#dialog").css("display", "block");
 	});*/
-	
+
 	$("#dialogTitle").on('mousedown', function(e){
 		document.getElementsByTagName("html")[0].style.cursor = "default";
 		document.getElementsByTagName("body")[0].style.cursor = "default";
-	
+
 		var div = $('#dialog');
 		offY= e.clientY-parseInt(div.offset().top);
 		offX= e.clientX-parseInt(div.offset().left);
 		window.addEventListener('mousemove', Utils.divMove, true);
-		
+
 	});
 	$("#dialogTitle").on('mouseup', function(e){
 		document.getElementsByTagName("html")[0].style.cursor = "";
 		document.getElementsByTagName("body")[0].style.cursor = "";
 		window.removeEventListener('mousemove', Utils.divMove, true);
 	});
-	
+
 	var openHover = function(e, message){
 		$("#hoverMessage").css('display', 'block');
 		$("#hoverMessage").offset({top: $(e.target).offset().top, left: $(e.target).offset().left+$(e.target).outerWidth(true)});
@@ -60,7 +60,7 @@ window.onload = function(){
 	var closeHover = function(e){
 		$("#hoverMessage").css('display', 'none');
 	};
-	
+
 	//Set up hover messages..
 	$("#selectButton").hover(function(e){
 		openHover(e, Blockly.Msg.SELECT_ADDRESS_HOVER);
@@ -71,36 +71,6 @@ window.onload = function(){
 	$("#calibrateButton").hover(function(e){
 		openHover(e, Blockly.Msg.CALIBRATE_HOVER);
 	}, closeHover);
-	
-	//LOAD UP EVERYTHING
-	SpheroManager.loadWorkspaceFromLocalStorage();
-	
-	setInterval(SpheroManager.saveWorkspaceToLocalStorage, 10000);
-	window.addEventListener('beforeunload', function(e){
-		SpheroManager.saveWorkspaceToLocalStorage();
-	});
-}
-
-SpheroManager.saveWorkspaceToLocalStorage = function(){
-	console.log("workspace saved.");
-	
-	var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
-	xml = Blockly.Xml.domToPrettyText(xml);
-	localStorage.setItem("xml", xml);
-}
-
-SpheroManager.loadWorkspaceFromLocalStorage = function(){
-	var xml = localStorage.getItem("xml");
-	if (xml === undefined || xml === null){		
-		var defaultXml = 
-			'<xml>' +
-			'	<block type="sphero_run" x="70" y="70"></block>' +
-			'</xml>';
-		SpheroManager.loadBlocks(defaultXml);
-		return;
-	}
-	Blockly.mainWorkspace.clear();
-	SpheroManager.loadBlocks(xml);
 }
 
 SpheroManager.example_projects = {};
@@ -148,8 +118,8 @@ SpheroManager.openProject = function(){
 		if (value in SpheroManager.example_projects){
 			$(textarea).html(example_projects[value]);
 		}else{
-			$.get("./demo/"+value+".xml", function(data){
-				//data = Blockly.Xml.domToText(data);
+			$.get("../demo/"+value+".xml", function(data){
+				data = Utils.xmlToString(data);
 				SpheroManager.example_projects[value] = data;
 				$(textarea).html(data);
 			});
@@ -157,14 +127,14 @@ SpheroManager.openProject = function(){
 	});
 	message.append(example_select);
 		message.append(document.createElement('br'));
-	
+
 	var textarea = $(document.createElement('textarea'));
 	textarea.attr('id', 'dialog_block_xml');
 	textarea.css("width", "98%").css("height", "54%").css("margin-top", "5px");
-	
+
 	message.append(textarea);
-	
-	
+
+
 	var button = $(document.createElement('div'));
 	button.html(Blockly.Msg.LOAD_PROJECT);
 	button.attr('id', 'dialogButton');
@@ -175,7 +145,7 @@ SpheroManager.openProject = function(){
 		Utils.closeDialog();
 	});
 	button.width(150);
-	
+
 	SpheroManager.alertMessage(Blockly.Msg.OPEN_PROJECT, message, button);
 	$("#dialog").height(320);
 }
@@ -183,7 +153,7 @@ SpheroManager.openProject = function(){
 SpheroManager.saveProject = function(){
 	var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
 	xml = Blockly.Xml.domToPrettyText(xml);
-	
+
 	var message = $(document.createElement("div"));
 	message.append(document.createTextNode(Blockly.Msg.FILENAME));
 	var filename = $(document.createElement("input"));
@@ -197,7 +167,7 @@ SpheroManager.saveProject = function(){
 	textarea.css("width", "98%").css("height", "56%").css("margin-top", "5px");
 	textarea.html(xml);
 	message.append(textarea);
-	
+
 	var button = $(document.createElement('div'));
 	button.html(Blockly.Msg.SAVE_PROJECT);
 	button.attr('id', 'dialogButton');
@@ -207,7 +177,7 @@ SpheroManager.saveProject = function(){
 		Utils.closeDialog();
 	});
 	button.width(150);
-	
+
 	SpheroManager.alertMessage(Blockly.Msg.SAVE_PROJECT_DOWNLOAD_BLOCKS, message, button);
 }
 
@@ -222,7 +192,7 @@ SpheroManager.alertMessage = function(title, message, button){
 	$("#dialog").height(300);
 	$("#closeDialogButton").off('click');
 	$("#closeDialogButton").on("click", Utils.closeDialog);
-	
+
 	//TODO (not good with two button?)
 	window.onkeydown = function(e){
 		if(!$("input,textarea").is(":focus")){
@@ -246,7 +216,7 @@ SpheroManager.connect = function() {
 
 	var message = $(document.createElement('div')).attr('id', 'tableWrapper');
 	message.html(Blockly.Msg.ATTEMPTING_CONNECTION(spheroAddress));
-	
+
 	var button = $(document.createElement('div')).attr('id', 'dialogButton');
 	button.on('click', function(e){
 		Utils.closeDialog();
@@ -266,27 +236,27 @@ SpheroManager.connect = function() {
 		button.html(Blockly.Msg.OK);
 		if (!is_connected) {
 			message = $(document.createElement('div')).html(Blockly.Msg.CONNECTION_FAILED);
-			
+
 			SpheroManager.alertMessage(Blockly.Msg.NOT_CONNECTED, message, button);
 			$("#selectButton").attr("disabled", false);
 			$("#connectButton").attr("disabled", false);
 			return;
 		}
-		
+
 		message = $(document.createElement("div")).html(Blockly.Msg.CONNECTION_SUCCESSFUL);
 		SpheroManager.sphero.connectionReset();
-		
+
 		$("#hoverMessage").css('display', 'none');
 		$("#selectButton").attr("disabled", true);
 		$("#connectButton").attr("disabled", true);
 		$("#disconnectButton").attr("disabled", false);
 		//$("#spheroHeading").attr("disabled", false);
-		
+
 		$("#calibrateButton").attr("disabled", false);
 		$("#runButton").attr("disabled", false);
 		$("#stopButton").attr("disabled", false);
 		$("#sleepButton").attr("disabled", false);
-		
+
 		SpheroManager.alertMessage(Blockly.Msg.CONNECTED, message, button);
 	});
 }
@@ -310,7 +280,7 @@ SpheroManager.listDevices = function(){
 
 	var addressBox = $("#spheroAddress")[0];
 	var tableWrapper = $("#tableWrapper")[0];
-	
+
 	$("#selectButton").attr("disabled", true);
 	$("#connectButton").attr("disabled", true);
 	SpheroManager.sphero.listSpheros(function(devices){
@@ -325,14 +295,14 @@ SpheroManager.listDevices = function(){
 		}
 		tableStr += "</table>";
 		message.html(devices.length.toString()+ Blockly.Msg.DEVICES_FOUND +" <br />"+tableStr);
-		
+
 		button = $(document.createElement('div')).attr('id', 'dialogButton').html("Cancel");
 		button.on('click', function(e){
 			Utils.closeDialog();
 		});
-		
+
 		SpheroManager.alertMessage(Blockly.Msg.SELECT_ADDRESS, message, button);
-		
+
 		$("#hoverMessage").css('display', 'none');
 		$("#selectButton")[0].disabled = false;
 		$("#connectButton")[0].disabled = false;
@@ -341,7 +311,7 @@ SpheroManager.listDevices = function(){
 
 SpheroManager.disconnect = function() {
 	SpheroManager.sphero.disconnect();
-	
+
 	$("#hoverMessage").css('display', 'none');
 	$("#selectButton")[0].disabled = false;
 	$("#connectButton")[0].disabled = false;
@@ -355,7 +325,7 @@ SpheroManager.disconnect = function() {
 
 SpheroManager.sleep = function(){
 	SpheroManager.sphero.sleep();
-	
+
 	$("#hoverMessage").css('display', 'none');
 	$("#selectButton")[0].disabled = false;
 	$("#connectButton")[0].disabled = false;
@@ -398,12 +368,12 @@ SpheroManager.calibrate = function(){
 	SpheroManager.sphero.clearEventHandlers();
 	SpheroManager.sphero.clearAllCommands();
 	SpheroManager.sphero.beginCalibrationMode();
-	
+
 	var message = $(document.createElement('div')).html(Blockly.Msg.CALIBRATE_MESSAGE);
 	var button = $(document.createElement('div')).attr('id', 'dialogButton').width(200).html(Blockly.Msg.END_CALIBRATE);
-	
+
 	var endCalibration = function(e){
-		$("#calibrateButton")[0].onclick = function(){ 
+		$("#calibrateButton")[0].onclick = function(){
 			tryTo(SpheroManager.calibrate)
 		};
 		$("#calibrateButton").html(Blockly.Msg.CALIBRATE);
@@ -411,7 +381,7 @@ SpheroManager.calibrate = function(){
 		Utils.closeDialog();
 	};
 	SpheroManager.alertMessage("Calibrate Sphero", message, button);
-	
+
 	button.on('click', endCalibration);
 	$("#calibrateButton")[0].onclick = endCalibration;
 	$("#calibrateButton").html(Blockly.Msg.END_CALIBRATE);

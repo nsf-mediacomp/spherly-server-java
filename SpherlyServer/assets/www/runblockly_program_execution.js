@@ -18,13 +18,13 @@ SpheroManager.run = function() {
 	SpheroManager.sphero.clearAllCommands();
 	SpheroManager.sphero.begin_execute();
 };
-	
+
 SpheroManager.evalCode = function(){
 	Blockly.mainWorkspace.traceOn(true);
 	//Add this to prevent infinite loop crashing :D!!!
 	window.loopTrap = 1000;
 	Blockly.JavaScript.INFINITE_LOOP_TRAP = 'if (--window.loopTrap <= 0) throw "Infinity";\n';
-	
+
 	var jscode = Blockly.JavaScript.workspaceToCode();
 	console.log(jscode);
 	try {

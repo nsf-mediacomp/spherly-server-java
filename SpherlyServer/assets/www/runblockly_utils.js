@@ -69,7 +69,21 @@ Utils.createDownloadLink = function(anchorSelector, str, fileName){
 		});
 	} else {
 		var url = "data:text/plain;charset=utf-8," + encodeURIComponent(str);
-		$(anchorSelector).attr("download", fileName);               
+		$(anchorSelector).attr("download", fileName);
 		$(anchorSelector).attr("href", url);
 	}
+}
+
+//http://stackoverflow.com/questions/6507293/convert-xml-to-string-with-jquery
+Utils.xmlToString = function (xmlData) {
+    var xmlString;
+    //IE
+    if (window.ActiveXObject){
+        xmlString = xmlData.xml;
+    }
+    // code for Mozilla, Firefox, Opera, etc.
+    else{
+        xmlString = (new XMLSerializer()).serializeToString(xmlData);
+    }
+    return xmlString;
 }
